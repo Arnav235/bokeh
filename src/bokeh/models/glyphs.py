@@ -63,6 +63,7 @@ from ..core.properties import (
     InstanceDefault,
     Int,
     MarkerSpec,
+    NDArraySpec,
     NullDistanceSpec,
     NumberSpec,
     Override,
@@ -834,8 +835,8 @@ class Image(ImageBase):
         ),
     }
 
-    image = NumberSpec(default=field("image"), help="""
-    The arrays of scalar data for the images to be colormapped.
+    image = NDArraySpec(2, default=field("image"), help="""
+    The 2D arrays of scalar data for the images to be colormapped.
     """)
 
     color_mapper = Instance(ColorMapper, default=InstanceDefault(LinearColorMapper, palette="Greys9"), help="""
@@ -860,8 +861,8 @@ class ImageRGBA(ImageBase):
 
     _args = ('image', 'x', 'y', 'dw', 'dh', 'dilate')
 
-    image = NumberSpec(default=field("image"), help="""
-    The arrays of RGBA data for the images.
+    image = NDArraySpec(2, default=field("image"), help="""
+    The 2D arrays of RGBA data for the images.
     """)
 
 class ImageStack(ImageBase):
@@ -880,7 +881,7 @@ class ImageStack(ImageBase):
 
     _args = ('image', 'x', 'y', 'dw', 'dh', 'dilate')
 
-    image = NumberSpec(default=field("image"), help="""
+    image = NDArraySpec(3, default=field("image"), help="""
     The 3D arrays of data for the images.
     """)
 
@@ -909,8 +910,7 @@ class ImageURL(XYGlyph):
     The URLs to retrieve images from.
 
     .. note::
-        The actual retrieving and loading of the images happens on
-        the client.
+        The actual retrieving and loading of the images happens on the client.
     """)
 
     x = NumberSpec(default=field("x"), help="""
