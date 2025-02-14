@@ -35,6 +35,7 @@ from .bases import (
     Property,
     TypeOrInst,
 )
+from .exceptions import ValueValidationError
 from .singletons import Intrinsic
 
 #-----------------------------------------------------------------------------
@@ -70,9 +71,9 @@ class Either(ParameterizedProperty[Any]):
 
             >>> m.prop = "auto"
 
-            >>> m.prop = 10.3   # ValueError !!
+            >>> m.prop = 10.3   # ValueValidationError !!
 
-            >>> m.prop = "foo"  # ValueError !!
+            >>> m.prop = "foo"  # ValueValidationError !!
 
     """
 
@@ -98,7 +99,7 @@ class Either(ParameterizedProperty[Any]):
             return
 
         msg = "" if not detail else f"expected an element of either {nice_join([ str(param) for param in self.type_params ])}, got {value!r}"
-        raise ValueError(msg)
+        raise ValueValidationError(msg)
 
     def wrap(self, value):
         for tp in self.type_params:

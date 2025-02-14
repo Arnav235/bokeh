@@ -41,6 +41,7 @@ from .bases import (
 )
 from .descriptors import ColumnDataPropertyDescriptor
 from .enum import Enum
+from .exceptions import ValueValidationError
 from .numeric import Int
 from .singletons import Intrinsic, Undefined
 from .wrappers import (
@@ -101,10 +102,10 @@ class Seq(ContainerProperty[T]):
                 if not self.item_type.is_valid(item):
                     invalid.append(item)
             msg = "" if not detail else f"expected an element of {self}, got seq with invalid items {invalid!r}"
-            raise ValueError(msg)
+            raise ValueValidationError(msg)
 
         msg = "" if not detail else f"expected an element of {self}, got {value!r}"
-        raise ValueError(msg)
+        raise ValueValidationError(msg)
 
     @classmethod
     def _is_seq(cls, value: Any) -> bool:
@@ -206,7 +207,7 @@ class Dict(ContainerProperty[Any]):
         expected = f"expected a dict of type {self}"
 
         if not isinstance(value, dict):
-            raise ValueError(f"{expected}, got a value of type {type(value)}" if detail else "")
+            raise ValueValidationError(f"{expected}, got a value of type {type(value)}" if detail else "")
 
         bad_keys = [str(k) for k in value if not key_is_valid(k)]
         bad_value_keys = [str(k) for (k, v) in value.items() if not value_is_valid(v)]
@@ -215,13 +216,13 @@ class Dict(ContainerProperty[Any]):
         bad_value_keys_str = f"invalid values for keys: {', '.join(bad_value_keys)}"
         err = None
         if (has_bad_keys := any(bad_keys)) & (has_bad_key_values := any(bad_value_keys)):
-            err = ValueError(f"{exception_header} {bad_keys_str} and {bad_value_keys_str}")
+            err = ValueValidationError(f"{exception_header} {bad_keys_str} and {bad_value_keys_str}")
         elif has_bad_keys:
-            err = ValueError(f"{exception_header} {bad_keys_str}")
+            err = ValueValidationError(f"{exception_header} {bad_keys_str}")
         elif has_bad_key_values:
-            err = ValueError(f"{exception_header} {bad_value_keys_str}")
+            err = ValueValidationError(f"{exception_header} {bad_value_keys_str}")
         if err:
-            raise err if detail else ValueError("")
+            raise err if detail else ValueValidationError("")
 
     def wrap(self, value):
         """ Some property types need to wrap their values in special containers, etc.
@@ -296,7 +297,7 @@ class Tuple(ContainerProperty):
                 return
 
         msg = "" if not detail else f"expected an element of {self}, got {value!r}"
-        raise ValueError(msg)
+        raise ValueValidationError(msg)
 
     def transform(self, value):
         """ Change the value into a JSON serializable format.
@@ -333,7 +334,7 @@ class RestrictedDict(Dict):
 
         if error_keys:
             msg = "" if not detail else f"Disallowed keys: {error_keys!r}"
-            raise ValueError(msg)
+            raise ValueValidationError(msg)
 
 TSeq = TypeVar("TSeq", bound=Seq[Any])
 
@@ -349,7 +350,7 @@ class NonEmpty(SingleParameterizedProperty[TSeq]):
 
         if not value:
             msg = "" if not detail else "Expected a non-empty container"
-            raise ValueError(msg)
+            raise ValueValidationError(msg)
 
 class Len(SingleParameterizedProperty[TSeq]):
     """ Allows only containers of the given length. """
@@ -364,7 +365,7 @@ class Len(SingleParameterizedProperty[TSeq]):
 
         if len(value) != self.length:
             msg = "" if not detail else f"Expected a container of length #{self.length}, got #{len(value)}"
-            raise ValueError(msg)
+            raise ValueValidationError(msg)
 
 #-----------------------------------------------------------------------------
 # Dev API

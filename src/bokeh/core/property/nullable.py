@@ -29,6 +29,7 @@ from .bases import (
     SingleParameterizedProperty,
     TypeOrInst,
 )
+from .exceptions import ValueValidationError
 
 #-----------------------------------------------------------------------------
 # Globals and constants
@@ -62,13 +63,13 @@ class Nullable(SingleParameterizedProperty[T | None]):
 
         try:
             super().validate(value, detail=False)
-        except ValueError:
+        except ValueValidationError:
             pass
         else:
             return
 
         msg = "" if not detail else f"expected either None or a value of type {self.type_param}, got {value!r}"
-        raise ValueError(msg)
+        raise ValueValidationError(msg)
 
 #-----------------------------------------------------------------------------
 # Dev API

@@ -44,6 +44,7 @@ from ..has_props import HasProps
 from ._sphinx import property_link, register_type_link, type_link
 from .descriptor_factory import PropertyDescriptorFactory
 from .descriptors import PropertyDescriptor
+from .exceptions import ValueValidationError
 from .singletons import (
     Intrinsic,
     IntrinsicType,
@@ -305,7 +306,7 @@ class Property(PropertyDescriptorFactory[T]):
             None
 
         Raises:
-            ValueError if the value is not valid for this property type
+            ValueValidationError if the value is not valid for this property type
 
         """
         pass
@@ -323,7 +324,7 @@ class Property(PropertyDescriptorFactory[T]):
         try:
             if validation_on():
                 self.validate(value, False)
-        except ValueError:
+        except ValueValidationError:
             return False
         else:
             return True
@@ -348,7 +349,7 @@ class Property(PropertyDescriptorFactory[T]):
             if validation_on():
                 hinted_value = self._hinted_value(value, hint)
                 self.validate(hinted_value)
-        except ValueError as e:
+        except ValueValidationError as e:
             for tp, converter in self.alternatives:
                 if tp.is_valid(value):
                     value = converter(value)
@@ -360,7 +361,7 @@ class Property(PropertyDescriptorFactory[T]):
             value = self.transform(value)
         else:
             obj_repr = owner if isinstance(owner, HasProps) else owner.__name__
-            raise ValueError(f"failed to validate {obj_repr}.{name}: {error}")
+            raise ValueValidationError(f"failed to validate {obj_repr}.{name}: {error}")
 
         if isinstance(owner, HasProps):
             obj = owner
@@ -375,7 +376,7 @@ class Property(PropertyDescriptorFactory[T]):
 
                 if not result:
                     if isinstance(msg_or_fn, str):
-                        raise ValueError(msg_or_fn)
+                        raise ValueValidationError(msg_or_fn)
                     else:
                         msg_or_fn(obj, name, value)
 
@@ -551,11 +552,11 @@ class PrimitiveProperty(Property[T]):
             return
 
         if not detail:
-            raise ValueError("")
+            raise ValueValidationError("")
 
         expected_type = nice_join([ cls.__name__ for cls in self._underlying_type ])
         msg = f"expected a value of type {expected_type}, got {value} of type {type(value).__name__}"
-        raise ValueError(msg)
+        raise ValueValidationError(msg)
 
 class ContainerProperty(ParameterizedProperty[T]):
     """ A base class for Container-like type properties.
