@@ -5,5 +5,6 @@
 
 Bokeh version ``3.9.0`` (November 2025) is a minor milestone of Bokeh project.
 
+* Replaced data annotations (``Arrow``, ``Band``, ``LabelSet``, ``Whisker``) with glyphs (:bokeh-pull:`14378`)
 * Added support for ARIA ``role`` attribute to ``Switch`` component (:bokeh-pull:`14341`)
 * Added support for dataclass as input to ``ColumnDataSource`` (:bokeh-pull:`14677`)
